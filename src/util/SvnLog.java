@@ -60,8 +60,13 @@ public class SvnLog {
 		ProcessResult processResult = UtilZ.runCmd(cmdLine, 180);//��ʱ60�룬1����
 		
 		sw.stop();
-		UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
-		
+		if(processResult.getStatusCode() == -1){
+			//异常抛出的错误
+			UtilZ.log("RunError: " + processResult.getError() + ", Duration: "+ sw.getDuration() +" ms");
+		}else {
+			UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
+		}
+
 		return logFileName;
 	}
 	

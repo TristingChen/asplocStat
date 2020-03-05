@@ -1,0 +1,22 @@
+<component name="ArtifactManager">
+  <artifact name="AspLocStat:jar">
+    <output-path>$PROJECT_DIR$/classes/artifacts/AspLocStat_jar</output-path>
+    <root id="root">
+      <element id="archive" name="AspLocStat.jar">
+        <element id="module-output" name="AspLocStat" />
+      </element>
+      <element id="directory" name="asploc_lib">
+        <element id="library" level="module" name="commons-dbcp-1.4.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="commons-exec-1.3.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="commons-pool-1.5.4.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="dom4j-1.6.1.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="log4j-1.2.17.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="lombok.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="mysql-connector-java-5.0.5-bin.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="nutz-1.r.57.r3.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="slf4j-api-1.7.10.jar" module-name="AspLocStat" />
+        <element id="library" level="module" name="slf4j-log4j12-1.7.6.jar" module-name="AspLocStat" />
+      </element>
+    </root>
+  </artifact>
+</component>

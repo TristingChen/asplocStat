@@ -26,7 +26,7 @@ public class UtilZ {
         
         cal.setTime(date); 
         cal.add(Calendar.DATE, 1); 
-        //System.out.println("ÏÂÒ»ÌìµÄÊ±¼äÊÇ£º" + sdf.format(cal.getTime())); 
+        //System.out.println("ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ç£ï¿½" + sdf.format(cal.getTime())); 
         nextDay = sdf.format(cal.getTime());
         return nextDay;
 	}
@@ -44,7 +44,7 @@ public class UtilZ {
 		
 		int exit[] = {0,1};
 		
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(expireSec * 1000);//ÉèÖÃ³¬Ê±Ê±¼ä
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(expireSec * 1000);//ï¿½ï¿½ï¿½Ã³ï¿½Ê±Ê±ï¿½ï¿½
 		
 		DefaultExecutor exec = new DefaultExecutor();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();  
@@ -60,9 +60,14 @@ public class UtilZ {
 			processResult.setResult(outputStream.toString("GB18030").trim());
 			processResult.setError(errorStream.toString("GB18030").trim());
 		} catch (ExecuteException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			processResult.setError(e.getMessage());
+			processResult.setStatusCode(-1);
+
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			processResult.setError(e.getMessage());
+			processResult.setStatusCode(-1);
 		}
 		
 		return processResult;

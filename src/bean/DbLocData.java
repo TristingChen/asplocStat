@@ -51,9 +51,6 @@ public class DbLocData {
 	@Column("SvnPropMods")
 	private String propMods = "false";
 	
-	@Column("addTime")
-	private java.util.Date addTime;
-	
 	@Column("isEnable")
 	private Integer isEnable = 1;
 }

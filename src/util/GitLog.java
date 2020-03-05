@@ -26,7 +26,7 @@ public class GitLog {
 		String localPath = getLocalPath(url);
 		
 		if(!Files.isDirectory(new File("git/" + localPath))) {
-			//Èç¹ûÄ¿Â¼²»´æÔÚ£¬ÔòĞèÒªclone
+			//ï¿½ï¿½ï¿½Ä¿Â¼ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½Òªclone
 			runGitClone(url, localPath);
 		}
 		String dir = "data/" + prjId + "/";
@@ -35,7 +35,7 @@ public class GitLog {
 		String logFileName =  dir + lastDate + "_" +nowDate + ".txt";
 		
 		if(prjId == 421) {
-			//421µÄÓÉcrontabÉú³É£¬ÎÄ¼şÃû²»Í¬
+			//421ï¿½ï¿½ï¿½ï¿½crontabï¿½ï¿½ï¿½É£ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Í¬
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			String today = formatter.format(new Date());
 			logFileName =  dir + today + ".txt";
@@ -69,7 +69,7 @@ public class GitLog {
 		String logFileName =  dir + lastDate + "_" +nowDate + "-amd.txt";
 
 		if(prjId == 421) {
-			//421µÄÓÉcrontabÉú³É£¬ÎÄ¼şÃû²»Í¬
+			//421ï¿½ï¿½ï¿½ï¿½crontabï¿½ï¿½ï¿½É£ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Í¬
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			String today = formatter.format(new Date());
 			logFileName =  dir + today + "-amd.txt";
@@ -117,11 +117,16 @@ public class GitLog {
 		
 		Stopwatch sw = Stopwatch.begin();
 		
-		ProcessResult processResult = UtilZ.runCmd(cmdLine, 10 * 60);//³¬Ê±60Ãë£¬1·ÖÖÓ
+		ProcessResult processResult = UtilZ.runCmd(cmdLine, 10 * 60);//ï¿½ï¿½Ê±60ï¿½ë£¬1ï¿½ï¿½ï¿½ï¿½
 		
 		sw.stop();
-	
-		UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
+		//åˆ¤æ–­æ˜¯å¦æœ‰æ‰§è¡Œé”™è¯¯çš„ä¿¡æ¯
+		if(processResult.getStatusCode() == -1){
+			//å¼‚å¸¸æŠ›å‡ºçš„é”™è¯¯
+			UtilZ.log("RunError: " + processResult.getError() + ", Duration: "+ sw.getDuration() +" ms");
+		}else {
+			UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
+		}
 	}
 	
 	public static LinkedHashMap<String, SvnLogEntry> getGitLogFromFile(String logFile) {
@@ -146,8 +151,8 @@ public class GitLog {
             	
             	String[] words = line.trim().split("\\|");
             	if(words.length == 3) {
-            		//µÚÒ»ĞĞ
-            		if(fileZ.size() > 0) {//ÓĞÊı¾İ£¬ÄÇÃ´ÏÖÔÚÊÇ»»Ìá½»IDÁË
+            		//ï¿½ï¿½Ò»ï¿½ï¿½
+            		if(fileZ.size() > 0) {//ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½Ç»ï¿½ï¿½á½»IDï¿½ï¿½
             			entry.setFileZ(fileZ);
             			entryZ.put(entry.getVersion(), entry);
 
@@ -190,8 +195,8 @@ public class GitLog {
             	}
             }
             
-            //ÊÕÎ²
-            if(fileZ.size() > 0) {//ÓĞÊı¾İ£¬ÄÇÃ´ÏÖÔÚÊÇ»»Ìá½»IDÁË
+            //ï¿½ï¿½Î²
+            if(fileZ.size() > 0) {//ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½Ç»ï¿½ï¿½á½»IDï¿½ï¿½
     			entry.setFileZ(fileZ);
     			entryZ.put(entry.getVersion(), entry);
             }
