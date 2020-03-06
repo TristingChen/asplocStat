@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import bean.*;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
@@ -18,13 +19,6 @@ import org.nutz.dao.Sqls;
 import org.nutz.dao.impl.NutDao;
 import org.nutz.dao.sql.Sql;
 import org.nutz.dao.sql.SqlCallback;
-
-import bean.DbLocConfig;
-import bean.DbLocData;
-import bean.DbLocProject;
-import bean.DbLocReleaseData;
-import bean.DbLocReleaseJob;
-import bean.LocResult;
 
 public class DbUtil {
 	static Dao myDao = null;
@@ -224,5 +218,15 @@ public class DbUtil {
 		Condition cnd  = Cnd.where("projectId", "=", projectId).and("SvnRevisionId", "=", versionId);
 		
 		myDao.update(DbLocData.class, Chain.make("isEnable", 0), cnd);
+	}
+
+	public static void saveLocPathLog(int build, ResultBean resultBean){
+		DbLocProjectLogs dbLocProjectLogs = new DbLocProjectLogs();
+		//先进行已有表数据的删除 然后插入
+		myDao.clear(dbLocProjectLogs.getClass(),Cnd.where("build","=",build));
+		dbLocProjectLogs.setBuild(build);
+		dbLocProjectLogs.setMsg(resultBean.getMsg());
+		dbLocProjectLogs.setStatus(dbLocProjectLogs.getStatus());
+		myDao.insert(dbLocProjectLogs);
 	}
 }

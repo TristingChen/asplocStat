@@ -21,7 +21,6 @@ public class RunSvnLoc {
 		} catch(Exception e){}
 
 		DbUtil.initDb();
-
 		// DbUtil.loadConfigByTag("skipFileType");
 
 		// 1、 从数据库获取项目ID、URL等

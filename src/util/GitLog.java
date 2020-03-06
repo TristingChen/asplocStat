@@ -1,16 +1,12 @@
 package util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
+import bean.ResultBean;
 import org.apache.commons.exec.CommandLine;
 import org.nutz.lang.Files;
 import org.nutz.lang.Stopwatch;
@@ -21,13 +17,17 @@ import bean.ProcessResult;
 
 public class GitLog {
 	static SimpleDateFormat dateFmt   = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-	
-	public static String getGitNumFromServer(int prjId, String lastDate, String nowDate, String url) {
+	private static ResultBean<Serializable> resultBean = new ResultBean<>();
+	public static ResultBean getGitNumFromServer(int prjId, String lastDate, String nowDate, String url) {
 		String localPath = getLocalPath(url);
 		
 		if(!Files.isDirectory(new File("git/" + localPath))) {
 			//���Ŀ¼�����ڣ�����Ҫclone
-			runGitClone(url, localPath);
+			ResultBean runGitCloneresultBean =  runGitClone(url, localPath);
+			//如果克隆失败 直接返回
+			if(runGitCloneresultBean.getStatus() == -1){
+				return runGitCloneresultBean;
+			}
 		}
 		String dir = "data/" + prjId + "/";
 		Files.createDirIfNoExists(dir);
@@ -39,14 +39,15 @@ public class GitLog {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			String today = formatter.format(new Date());
 			logFileName =  dir + today + ".txt";
+			return resultBean.resultOnly(logFileName);
 		} else {
-			runProcess("./git_log_num.sh", lastDate, nowDate, localPath, logFileName);
+
+			ResultBean logNumResultBean =  runProcess("./git_log_num.sh", lastDate, nowDate, localPath, logFileName);
+			return  logNumResultBean;
 		}
-		
-		 return logFileName;
 	}
 
-	private static void runGitClone(String url, String localPath) {
+	private static ResultBean runGitClone(String url, String localPath) {
 		String path = "git/"+ localPath;
 		//System.out.println("git clone " + path);
 		int inx = path.lastIndexOf("/");
@@ -56,11 +57,12 @@ public class GitLog {
 		
 		Files.createDirIfNoExists(path);
 		//System.out.println("git clone " + url + "\t" + path);
-		
-		runProcess("./git_clone.sh", path, url, "", "");
+
+		ResultBean runGitClone = runProcess("./git_clone.sh", path, url, "", "");
+		return runGitClone;
 	}
 	
-	public static String getGitActionFromServer(int prjId, String lastDate, String nowDate, String url) {
+	public static ResultBean getGitActionFromServer(int prjId, String lastDate, String nowDate, String url) {
 		String localPath = getLocalPath(url);
 		
 		String dir = "data/" + prjId + "/";
@@ -74,9 +76,10 @@ public class GitLog {
 			String today = formatter.format(new Date());
 			logFileName =  dir + today + "-amd.txt";
 		} else {
-			runProcess("./git_log_action.sh", lastDate, nowDate, localPath, logFileName);
+			ResultBean logActionResultBean = runProcess("./git_log_action.sh", lastDate, nowDate, localPath, logFileName);
+			return logActionResultBean;
 		}
-		 return logFileName;
+		 return resultBean.resultOnly(logFileName);
 	}
 	
 	public static String getLocalPath(String url) {
@@ -105,7 +108,7 @@ public class GitLog {
 		return localpath;
 	}
 	
-	public static void runProcess(String cmd, String lastDate, String nowDate, String url, String logFileName) {
+	public static ResultBean runProcess(String cmd, String lastDate, String nowDate, String url, String logFileName) {
 		CommandLine cmdLine = new CommandLine(cmd);
 
 		cmdLine.addArgument(lastDate);
@@ -123,13 +126,17 @@ public class GitLog {
 		//判断是否有执行错误的信息
 		if(processResult.getStatusCode() == -1){
 			//异常抛出的错误
+
 			UtilZ.log("RunError: " + processResult.getError() + ", Duration: "+ sw.getDuration() +" ms");
+			return resultBean.result(-1,processResult.getError(),"");
 		}else {
 			UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
 		}
+		return resultBean.resultOnly("");
 	}
 	
-	public static LinkedHashMap<String, SvnLogEntry> getGitLogFromFile(String logFile) {
+	public static ResultBean getGitLogFromFile(String logFile) {
+		//LinkedHashMap<String, SvnLogEntry>
 		LinkedHashMap<String, SvnLogEntry> entryZ = new LinkedHashMap<String, SvnLogEntry>();
 	    
 		File file = new File(logFile);
@@ -200,12 +207,10 @@ public class GitLog {
     			entry.setFileZ(fileZ);
     			entryZ.put(entry.getVersion(), entry);
             }
-        } catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+        }catch (Exception e){
+			UtilZ.log("XMLError: " + logFile);
+			resultBean.setProperties(-1,e.getMessage(),"");
 		}
-	    
-	    return entryZ;
+        return resultBean.resultOnly(entryZ);
 	}
 }

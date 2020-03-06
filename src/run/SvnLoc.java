@@ -3,6 +3,7 @@ package run;
 import java.util.List;
 
 import bean.DbLocData;
+import bean.ResultBean;
 import bean.SvnLogEntry;
 import util.DbUtil;
 import util.SvnLocResult;
@@ -10,8 +11,9 @@ import util.SvnLog;
 import util.UtilZ;
 
 public class SvnLoc {
+	private static ResultBean<java.io.Serializable> resultBean = new ResultBean<>();
 
-	public static void getLoc(int projectId, String url) {
+	public static ResultBean getLoc(int projectId, String url) {
 		
 		//2、 从数据库读取该项目ID之前的日期、versionID等
 		String[] lastVersion = DbUtil.getLastVersion(projectId);
@@ -24,11 +26,21 @@ public class SvnLoc {
 		String nowDate = UtilZ.getNextDay();
 
 		// 通过svn log，获得xml，比如"data\\2016-08-01_2016-09-03.xml";//
-		String logFileName = SvnLog.getLogFromSVNServer(projectId, lastSvnVerId, lastDate, nowDate, url);
+		ResultBean logFileNameResultBean = SvnLog.getLogFromSVNServer(projectId, lastSvnVerId, lastDate, nowDate, url);
+		if(logFileNameResultBean.getStatus() == -1){
+			//svn_log脚本执行失败 进行locpathlog数据存入
+			DbUtil.saveLocPathLog(projectId,logFileNameResultBean);
+			return logFileNameResultBean;
+		}
+		String logFileName = (String)logFileNameResultBean.getData();
 		//String logFileName = "data/11/2016-08-01_2016-09-08.xml";
 
-		List<SvnLogEntry> svnEntryZ = SvnLog.getSvnLogFromFile(logFileName);
-
+		ResultBean svnEntryZResultBean = SvnLog.getSvnLogFromFile(logFileName);
+		if(svnEntryZResultBean.getStatus() == -1){
+			DbUtil.saveLocPathLog(projectId,svnEntryZResultBean);
+			return logFileNameResultBean;
+		}
+		List<SvnLogEntry> svnEntryZ = (List<SvnLogEntry>)svnEntryZResultBean.getData();
 		int count = 0;
 		int total = 0;
 		for (SvnLogEntry entry : svnEntryZ) {
@@ -72,15 +84,10 @@ public class SvnLoc {
 					DbUtil.disAbleByVersion(projectId, versionId+"");
 				}
 			}
-//			else {
-//				// 如果提交中一个修改文本文件也没有，要提醒一下
-//				for (SvnLogFile path : entry.getFileZ().values()) {
-//					System.out.println("NoLoc\t" + entry.getVersion() + "\t" + entry.getAuthor() + "\t"
-//							+ DateUtil.toLongStr(entry.getDate()) + "\t" + path.getAction() + "\t" + path.getPath());
-//				}
-//			}
-			
 		}
+		//插入locpathlog数据为成功
+
 		UtilZ.log("Finish: " + projectId + ", rAll: " + count + ", locAll: " + total);
+		return resultBean.resultOnly("");
 	}
 }

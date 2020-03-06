@@ -1,10 +1,12 @@
 package run;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import bean.ResultBean;
 import org.nutz.lang.Files;
 
 import bean.DbLocData;
@@ -16,10 +18,10 @@ import util.UtilZ;
 
 public class GitLoc {
 	static SimpleDateFormat dateFmt2 = new SimpleDateFormat("yyyy-MM-dd");
-	
-	public static void getLoc(int projectId, String url) {
+	private static ResultBean<Serializable> resultBean = new ResultBean<>();
+	public static ResultBean getLoc(int projectId, String url) {
 		
-		//ÉîÛÚIDCÎÞ·¨·ÃÎÊ112.33.1.20
+		//ï¿½ï¿½ï¿½ï¿½IDCï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½112.33.1.20
 		url = url.replace("112.33.1.20", "10.9.20.25");
 		
 		String[] lastVersion = DbUtil.getLastVersion(projectId);
@@ -33,18 +35,37 @@ public class GitLoc {
 
 		String nowDate = UtilZ.getNextDay();
 
-		String logFileName = GitLog.getGitNumFromServer(projectId, lastDate, nowDate, url);
-		HashMap<String, SvnLogEntry> entryZ = GitLog.getGitLogFromFile(logFileName);
-
-		// Éú³ÉamdµÄactionMap
-		String actFileName = GitLog.getGitActionFromServer(projectId, lastDate, nowDate, url);
-		HashMap<String, SvnLogEntry> actionZ = GitLog.getGitLogFromFile(actFileName);
-
-		//ÓÉÓÚgitµÄversion²»ÊÇÊý×Ö£¬¶øÊÇ×Ö·û´®£¬Òò´ËÐèÒª´ÓÊý¾Ý¿â¼ÓÔØµ±Ç°ÏîÄ¿µÄËùÓÐversionId
+		ResultBean logFileNameResultBean = GitLog.getGitNumFromServer(projectId, lastDate, nowDate, url);
+		if(logFileNameResultBean.getStatus() == -1){
+			DbUtil.saveLocPathLog(projectId,logFileNameResultBean);
+			return logFileNameResultBean;
+		}
+		String logFileName = (String)logFileNameResultBean.getData();
+		ResultBean entryZResultBean = GitLog.getGitLogFromFile(logFileName);
+		if(entryZResultBean.getStatus() == -1){
+			DbUtil.saveLocPathLog(projectId,entryZResultBean);
+			return entryZResultBean;
+		}
+		HashMap<String, SvnLogEntry> entryZ = (HashMap<String, SvnLogEntry>)entryZResultBean.getData();
+		// ï¿½ï¿½ï¿½ï¿½amdï¿½ï¿½actionMap
+		ResultBean actFileNameResultBean = GitLog.getGitActionFromServer(projectId, lastDate, nowDate, url);
+		if(actFileNameResultBean.getStatus() == -1){
+			DbUtil.saveLocPathLog(projectId,actFileNameResultBean);
+			return actFileNameResultBean;
+		}
+		String actFileName = (String)actFileNameResultBean.getData();
+		//HashMap<String, SvnLogEntry>
+		ResultBean actionZresultBean = GitLog.getGitLogFromFile(actFileName);
+		if(actionZresultBean.getStatus() == -1){
+			DbUtil.saveLocPathLog(projectId,actionZresultBean);
+			return actionZresultBean;
+		}
+		HashMap<String, SvnLogEntry> actionZ = (HashMap<String, SvnLogEntry>)actionZresultBean.getData();
+		//ï¿½ï¿½ï¿½ï¿½gitï¿½ï¿½versionï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½Øµï¿½Ç°ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½versionId
 		List<String> versionZinDb = DbUtil.loadVersionByProject(projectId);
 		
 		String[] sortedVersionZ = sortKeyZ(entryZ.keySet());
-		//¶Ôversion½øÐÐµ¹ÅÅÐò£¬Ä¬ÈÏÊÇ°´ÕÕÊ±¼äÐÂ->¾É£¬ÖØÐÂÅÅÐòºóÎª¾É->ÐÂ
+		//ï¿½ï¿½versionï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½->ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½->ï¿½ï¿½
 		
 		int count = 0;
 		int total = 0;
@@ -53,7 +74,7 @@ public class GitLoc {
 			String version16 = version.substring(0,16);
 			
 			if(versionZinDb.contains(version)){
-				//Èç¹ûÊÇÒÑ¾­´æÔÚµÄverson£¬ÔòÌø¹ý
+				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½Úµï¿½versonï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				UtilZ.log("Skip: g." + version16  + "@" + projectId + " " + entry.getAuthor()
 								+ " " + UtilZ.toLongStr(entry.getDate()) );
 				continue;
@@ -66,9 +87,9 @@ public class GitLoc {
 				
 				//UtilZ.log(version + "\t" + entry.getAuthor() + "\t" + UtilZ.toLongStr(entry.getDate()));
 	
-				// »ñÈ¡locµÄmap
+				// ï¿½ï¿½È¡locï¿½ï¿½map
 				HashMap<String, SvnLogFile> entryFileZ = entry.getFileZ();
-				// »ñÈ¡amdµÄmap
+				// ï¿½ï¿½È¡amdï¿½ï¿½map
 				HashMap<String, SvnLogFile> actionFileZ = action.getFileZ();
 				
 				int vCount = 0;
@@ -110,6 +131,7 @@ public class GitLoc {
 			}
 		}
 		UtilZ.log("Finish: " + projectId + ", gAll: " + count + ", locAll: " + total);
+		return resultBean.resultOnly("");
 	}
 	
 	private static DbLocData makeLocData(SvnLogEntry entry, SvnLogFile loc, String action) {
@@ -122,7 +144,7 @@ public class GitLoc {
 		
 		result.setLocPath(loc.getPath());
 		result.setAction(action);
-		result.setFileType(Files.getSuffixName(loc.getPath())); //ÎÄ¼þºó×ºÃû
+		result.setFileType(Files.getSuffixName(loc.getPath())); //ï¿½Ä¼ï¿½ï¿½ï¿½×ºï¿½ï¿½
 		
 		result.setLineAdd(loc.getLineAdd());
 		result.setLineDel(loc.getLineDel());

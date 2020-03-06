@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
+import bean.ResultBean;
 import org.apache.commons.exec.CommandLine;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -23,8 +24,9 @@ import bean.SvnLogFile;
 
 public class SvnLog {
 	static SimpleDateFormat dateFmt   = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	
-	public static String getLogFromSVNServer(int prjId, int lastSvnVerId, String lastDate, String nowDate, String url) {
+	private static ResultBean<java.io.Serializable> resultBean = new ResultBean<>();
+
+	public static ResultBean getLogFromSVNServer(int prjId, int lastSvnVerId, String lastDate, String nowDate, String url) {
 		String dir = "data/" + prjId + "/";
 		Files.createDirIfNoExists(dir);
 		
@@ -60,18 +62,21 @@ public class SvnLog {
 		ProcessResult processResult = UtilZ.runCmd(cmdLine, 180);//��ʱ60�룬1����
 		
 		sw.stop();
+
+
 		if(processResult.getStatusCode() == -1){
 			//异常抛出的错误
 			UtilZ.log("RunError: " + processResult.getError() + ", Duration: "+ sw.getDuration() +" ms");
+
+			 resultBean.setProperties(-1,processResult.getError(),logFileName);
 		}else {
 			UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
 		}
-
-		return logFileName;
+        return resultBean.resultOnly(logFileName);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static List<SvnLogEntry> getSvnLogFromFile(String file) {
+	public static ResultBean getSvnLogFromFile(String file) {
 		LinkedList<SvnLogEntry> entryZ = new LinkedList<SvnLogEntry>();
 	    
 		dateFmt.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -173,8 +178,10 @@ public class SvnLog {
 		} catch (DocumentException e) {
 			//e.printStackTrace();
 			UtilZ.log("XMLError: " + file);
+			resultBean.setProperties(-1,e.getMessage(),"");
+
 		}
 	    
-	    return entryZ;
+		return resultBean.resultOnly(entryZ);
 	}
 }
