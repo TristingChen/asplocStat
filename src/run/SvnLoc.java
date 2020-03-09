@@ -14,7 +14,8 @@ public class SvnLoc {
 	private static ResultBean<java.io.Serializable> resultBean = new ResultBean<>();
 
 	public static ResultBean getLoc(int projectId, String url) {
-		
+		//防止成功执行时间长中断，先清除日志
+		DbUtil.clearLocPathLog(projectId);
 		//2、 从数据库读取该项目ID之前的日期、versionID等
 		String[] lastVersion = DbUtil.getLastVersion(projectId);
 		int lastSvnVerId = Integer.parseInt(lastVersion[0]);
@@ -88,6 +89,7 @@ public class SvnLoc {
 		//插入locpathlog数据为成功
 
 		UtilZ.log("Finish: " + projectId + ", rAll: " + count + ", locAll: " + total);
+
 		return resultBean.resultOnly("");
 	}
 }

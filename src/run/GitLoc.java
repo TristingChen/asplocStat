@@ -20,7 +20,8 @@ public class GitLoc {
 	static SimpleDateFormat dateFmt2 = new SimpleDateFormat("yyyy-MM-dd");
 	private static ResultBean<Serializable> resultBean = new ResultBean<>();
 	public static ResultBean getLoc(int projectId, String url) {
-		
+		//统计成功进行错误日志的删除与新增
+		DbUtil.clearLocPathLog(projectId);
 		//����IDC�޷�����112.33.1.20
 		url = url.replace("112.33.1.20", "10.9.20.25");
 		
@@ -58,7 +59,7 @@ public class GitLoc {
 		ResultBean actionZresultBean = GitLog.getGitLogFromFile(actFileName);
 		if(actionZresultBean.getStatus() == -1){
 			DbUtil.saveLocPathLog(projectId,actionZresultBean);
-			return actionZresultBean;
+			return actFileNameResultBean;
 		}
 		HashMap<String, SvnLogEntry> actionZ = (HashMap<String, SvnLogEntry>)actionZresultBean.getData();
 		//����git��version�������֣������ַ����������Ҫ�����ݿ���ص�ǰ��Ŀ������versionId
@@ -131,6 +132,7 @@ public class GitLoc {
 			}
 		}
 		UtilZ.log("Finish: " + projectId + ", gAll: " + count + ", locAll: " + total);
+
 		return resultBean.resultOnly("");
 	}
 	

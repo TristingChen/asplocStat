@@ -68,7 +68,7 @@ public class SvnLog {
 			//异常抛出的错误
 			UtilZ.log("RunError: " + processResult.getError() + ", Duration: "+ sw.getDuration() +" ms");
 
-			 resultBean.setProperties(-1,processResult.getError(),logFileName);
+			 return resultBean.result(-1,processResult.getError(),logFileName);
 		}else {
 			UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
 		}
@@ -178,8 +178,7 @@ public class SvnLog {
 		} catch (DocumentException e) {
 			//e.printStackTrace();
 			UtilZ.log("XMLError: " + file);
-			resultBean.setProperties(-1,e.getMessage(),"");
-
+			return  resultBean.result(-1,e.getMessage(),"");
 		}
 	    
 		return resultBean.resultOnly(entryZ);

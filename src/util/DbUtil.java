@@ -223,10 +223,17 @@ public class DbUtil {
 	public static void saveLocPathLog(int build, ResultBean resultBean){
 		DbLocProjectLogs dbLocProjectLogs = new DbLocProjectLogs();
 		//先进行已有表数据的删除 然后插入
-		myDao.clear(dbLocProjectLogs.getClass(),Cnd.where("build","=",build));
+		clearLocPathLog(build);
+
 		dbLocProjectLogs.setBuild(build);
 		dbLocProjectLogs.setMsg(resultBean.getMsg());
-		dbLocProjectLogs.setStatus(dbLocProjectLogs.getStatus());
+		dbLocProjectLogs.setStatus(resultBean.getStatus());
 		myDao.insert(dbLocProjectLogs);
+	}
+
+	public static void clearLocPathLog(int build){
+		DbLocProjectLogs dbLocProjectLogs = new DbLocProjectLogs();
+		//先进行已有表数据的删除 然后插入
+		myDao.clear(dbLocProjectLogs.getClass(),Cnd.where("build","=",build));
 	}
 }

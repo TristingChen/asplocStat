@@ -22,7 +22,6 @@ public class RunSvnLoc {
 
 		DbUtil.initDb();
 		// DbUtil.loadConfigByTag("skipFileType");
-
 		// 1、 从数据库获取项目ID、URL等
 		List<DbLocProject> projectZ = DbUtil.getProjectZfromDb();
 

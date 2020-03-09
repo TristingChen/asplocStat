@@ -7,9 +7,9 @@ import java.io.Serializable;
 
 @Data
 public class ResultBean<T> implements Serializable {
-    private int status; // 状态码：0正常，-1失败
+    private int status = 0; // 状态码：0正常，-1失败
 
-    private String msg; // 返回消息：成功还是失败
+    private String msg = ""; // 返回消息：成功还是失败
 
     private T data; // 返回的对象。有时候我们要返回一些数据就放在这个里，如果不需要返回数据则是null
     public ResultBean(){
@@ -18,9 +18,6 @@ public class ResultBean<T> implements Serializable {
         this.msg = "";
     }
     public ResultBean(T data) {
-        this.status = 0;
-
-        this.msg = "";
 
         this.data = data;
     }
@@ -51,11 +48,4 @@ public class ResultBean<T> implements Serializable {
         return new ResultBean(object);
     }
 
-    public void setProperties(int status, String msg, T object){
-        this.status = status;
-
-        this.msg = msg;
-
-        this.data = object;
-    }
 }

@@ -39,7 +39,7 @@ public class UtilZ {
 		logger.info(msg);
 	}
 	
-	public static ProcessResult runCmd(CommandLine cmdLine, int expireSec) {
+	public static ProcessResult runCmd(CommandLine cmdLine, int expireSec){
 		ProcessResult processResult = new ProcessResult();
 		
 		int exit[] = {0,1};
@@ -57,8 +57,7 @@ public class UtilZ {
 			exec.setExitValues(exit);
 
 			processResult.setExitValue(exec.execute(cmdLine));
-			processResult.setResult(outputStream.toString("GB18030").trim());
-			processResult.setError(errorStream.toString("GB18030").trim());
+			processResult.setResult(outputStream.toString("utf8").trim());
 		} catch (ExecuteException e) {
 //			e.printStackTrace();
 			processResult.setError(e.getMessage());
@@ -68,8 +67,15 @@ public class UtilZ {
 //			e.printStackTrace();
 			processResult.setError(e.getMessage());
 			processResult.setStatusCode(-1);
+		}catch (Exception e){
+			processResult.setError(e.getMessage());
+			processResult.setStatusCode(-1);
 		}
-		
+		try {
+			processResult.setError(processResult.getError()+errorStream.toString("utf8").trim());
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 		return processResult;
 	}
 }

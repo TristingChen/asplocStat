@@ -132,7 +132,7 @@ public class GitLog {
 		}else {
 			UtilZ.log("RunOk: " + processResult.getExitValue() + ", Duration: "+ sw.getDuration() +" ms");
 		}
-		return resultBean.resultOnly("");
+		return resultBean.resultOnly(logFileName);
 	}
 	
 	public static ResultBean getGitLogFromFile(String logFile) {
@@ -208,8 +208,8 @@ public class GitLog {
     			entryZ.put(entry.getVersion(), entry);
             }
         }catch (Exception e){
-			UtilZ.log("XMLError: " + logFile);
-			resultBean.setProperties(-1,e.getMessage(),"");
+			UtilZ.log("XMLError: " + e.getMessage());
+			return resultBean.result(-1,e.getMessage(),"");
 		}
         return resultBean.resultOnly(entryZ);
 	}
